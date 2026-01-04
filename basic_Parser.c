@@ -12,6 +12,8 @@ typedef enum {
     NUMBER,
     OPERATOR,
     END_OF_INPUT,
+    PAREN_LEFT,
+    PAREN_RIGHT,
 }TokenType;
 
 typedef struct {
@@ -26,6 +28,11 @@ typedef struct {
 Token *tokenize(const char *expression, int *token_count);//converts the array into individual operators/operands(Tokens)
 void printTokens(Token *token, int token_count);//prints out each of the individual tokens
 double evaluate_from_left_to_right(Token *token, int token_count);//evaluates from left to right without operator precedent
+int get_precedence(Token operator_token);
+int is_left_associative(Token operator_token);
+Token *shunting_yard(Token *input_token, int input_count, int *output_count );//implements shunting yard algorithm on the said tokens
+void test_shunting_yard();
+
 
 int main(void) {
     char expression[MAX_EXPRESSION_LENGTH];
@@ -47,7 +54,9 @@ int main(void) {
     printf("Result: %.2lf\n", result);
 
     free(tokens);
+    test_shunting_yard();
     return 0;
+
 
 
 }
@@ -88,6 +97,20 @@ Token *tokenize(const char *expression, int *token_count) {
             t++;
             i++;
             continue;
+        }
+        if (expression[i] == '(' ) {
+            tokens[t].type = PAREN_LEFT;//handle parentheses
+            tokens[t].data.op = '(';
+            t++; i++;
+            continue;
+
+        }
+        if (expression[i] == ')' ) {
+            tokens[t].type = PAREN_RIGHT;
+            tokens[t].data.op = ')';
+            t++; i++;
+            continue;
+
         }
         printf("Invalid character: %c\n", expression[i]);
         free(tokens);//free space temporary allocated
@@ -163,4 +186,105 @@ double evaluate_from_left_to_right(Token *token, int token_count) {
         }
     }
     return result;
+}
+
+int get_precedence(Token operator_token) {
+    switch (operator_token.data.op) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        default:
+            return 0;
+    }
+}
+
+int is_left_associative(Token operator_token) {
+    return (operator_token.data.op == '+' || operator_token.data.op == '-' || operator_token.data.op == '*' || operator_token.data.op == '/');
+}
+Token *shunting_yard(Token *input_token, int input_count, int *output_count ) {
+    Token *output_queue = malloc(sizeof(Token) * input_count);
+    Token *operator_stack = malloc(sizeof(Token) * input_count);
+
+    int output_queue_index = 0;
+    int operator_stack_index = -1;//it's made to have value of -1 to make sure that the stack is empty before even starting
+    for (int i = 0; i < input_count; i++) {
+        Token token = input_token[i];
+        if (token.type == NUMBER) {
+            output_queue[output_queue_index++] = token;
+        }
+        else if (token.type == OPERATOR) {
+            while (operator_stack_index >= 0
+                && operator_stack[operator_stack_index].type == OPERATOR
+                && ((get_precedence(operator_stack[operator_stack_index]) > get_precedence(token))
+                || (get_precedence(operator_stack[operator_stack_index]) == get_precedence(token) && is_left_associative(token)))
+                && operator_stack[operator_stack_index].data.op != '(') {
+
+                output_queue[output_queue_index++] = operator_stack[operator_stack_index--]; //pop from stack to output
+            }
+            operator_stack[++operator_stack_index] = token;
+        }
+        else if (token.type== PAREN_LEFT) {
+            operator_stack[++operator_stack_index] = token;
+
+        }
+        else if (token.type == PAREN_RIGHT) {
+            while (operator_stack_index >= 0 && operator_stack[operator_stack_index].data.op != '(') { //pop until '('
+                output_queue[output_queue_index++] = operator_stack[operator_stack_index--];
+            }
+            if (operator_stack_index >= 0 && operator_stack[operator_stack_index].data.op == '(') {
+                operator_stack_index--;
+            }
+            else {
+                free(output_queue);
+                free(operator_stack);
+                *output_count = 0;
+                return NULL;
+            }
+
+        }
+    }
+    while (operator_stack_index >= 0) {
+        if (operator_stack[operator_stack_index].data.op == '(') {//mismatched or too much parenthesis
+            free(output_queue);
+            free(operator_stack);
+            *output_count = 0;
+            return NULL;
+        }
+        output_queue[output_queue_index++] = operator_stack[operator_stack_index--];//pop the rest
+    }
+
+    free(operator_stack);
+    *output_count = output_queue_index;
+    return output_queue;
+
+}
+
+void test_shunting_yard() {
+    // Simple test: "3 + 4 * 2"
+    Token input[] = {
+        {NUMBER, .data.value = 3},
+        {OPERATOR, .data.op = '+'},
+        {NUMBER, .data.value = 4},
+        {OPERATOR, .data.op = '*'},
+        {NUMBER, .data.value = 2}
+    };
+
+    int output_count;
+    Token* output = shunting_yard(input, 5, &output_count);
+
+    if (output) {
+        printf("Postfix output (%d tokens):\n", output_count);
+        for (int i = 0; i < output_count; i++) {
+            if (output[i].type == NUMBER) {
+                printf("%.0f ", output[i].data.value);
+            } else {
+                printf("%c ", output[i].data.op);
+            }
+        }
+        printf("\n");
+        free(output);
+    }
 }
