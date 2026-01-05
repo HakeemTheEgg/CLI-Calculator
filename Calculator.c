@@ -323,7 +323,7 @@ double evaluate_postfix(Token *output_queue, int count) {
         }
         else if (output_queue[i].type == OPERATOR) {
             if (top < 1){
-            printf("not enough operands for operator");
+            printf("not enough operands for operator\n");
             return NAN;}
             double b = stack[top--];
             double a = stack[top--];
@@ -359,7 +359,7 @@ double evaluate_postfix(Token *output_queue, int count) {
     }
 
     if (top > 0) {
-        printf("invalid postfix expression. stack had %d expressions but should have 1", top + 1);
+        printf("invalid postfix expression. stack had %d expressions but should have 1\n", top + 1);
         return NAN;
     }
     return stack[0];
