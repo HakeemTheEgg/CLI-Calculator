@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 //macros
 #define MAX_TOKENS 50
@@ -28,10 +29,11 @@ typedef struct {
 Token *tokenize(const char *expression, int *token_count);//converts the array into individual operators/operands(Tokens)
 void printTokens(Token *token, int token_count);//prints out each of the individual tokens
 double evaluate_from_left_to_right(Token *token, int token_count);//evaluates from left to right without operator precedent
-int get_precedence(Token operator_token);
-int is_left_associative(Token operator_token);
+int get_precedence(Token operator_token);//checks precedence on operators
+int is_left_associative(Token operator_token);//checks if the current operator is left associative
 Token *shunting_yard(Token *input_token, int input_count, int *output_count );//implements shunting yard algorithm on the said tokens
-void test_shunting_yard();
+void test_shunting_yard();// test the shunting yard algorithm
+double evaluate_postfix(Token *output_queue, int count);//perform postfix evaluation on the return output array of the shunting yard algorithm
 
 
 int main(void) {
@@ -40,21 +42,37 @@ int main(void) {
 
     printf("Enter an expression:\n");
     fgets(expression, sizeof(expression), stdin);
-    expression[strcspn(expression, "\n")] = '\0';
+    expression[strcspn(expression, "\n")] = '\0';//creates the array of expression s
 
     int num_tokens = 0;
 
-    Token *tokens = tokenize(expression, &num_tokens);
+    Token *tokens = tokenize(expression, &num_tokens); // converts the input array to tokens
     if (tokens == NULL) {
         return 1;
     }
     printTokens(tokens, num_tokens);
 
-    double result = evaluate_from_left_to_right(tokens, num_tokens);
-    printf("Result: %.2lf\n", result);
-
+    int postfix_count = 0;
+    Token *postfix = shunting_yard(tokens, num_tokens, &postfix_count); //converts the tokens to postfix notation and then frees them
     free(tokens);
-    test_shunting_yard();
+
+    if (postfix == NULL) return 1;
+    printf("Postfix order:\n");
+    for (int i = 0; i < postfix_count; i++) {
+        if (postfix[i].type == NUMBER) printf("%.0f ", postfix[i].data.value);//prints out each member of the postfix
+        else printf("%c ", postfix[i].data.op);
+    }
+
+    double result = evaluate_postfix(postfix, postfix_count); //evaluated each member of the postfix and stores the result
+    free(postfix);
+
+    if (isnan(result)) {
+        printf("result failed!");
+        return 1;
+    }
+
+    printf("\nResult: %.2f",result);
+
     return 0;
 
 
@@ -287,4 +305,62 @@ void test_shunting_yard() {
         printf("\n");
         free(output);
     }
+}
+
+
+
+
+double evaluate_postfix(Token *output_queue, int count) {
+    if (count == 0 || output_queue == NULL) {
+        return NAN;
+    }
+    double stack[100];
+    int top = -1;
+
+    for (int i = 0; i < count; i++) {
+        if (output_queue[i].type == NUMBER) {
+            stack[++top] = output_queue[i].data.value;
+        }
+        else if (output_queue[i].type == OPERATOR) {
+            if (top < 1){
+            printf("not enough operands for operator");
+            return NAN;}
+            double b = stack[top--];
+            double a = stack[top--];
+
+            switch (output_queue[i].data.op) {
+                case '+':
+                    stack[++top] = a + b;
+                    break;
+                case  '-':
+                    stack[++top] = a - b;
+                    break;
+                case  '*':
+                    stack[++top] = a * b;
+                    break;
+                case  '/':
+                    if (b == 0.0) {
+                        printf("Invalid division by 0!\n");
+                        return NAN;
+                    }
+                    stack[++top] = a / b;
+                    break;
+                default:
+                    printf("Invalid expression!\n");
+                    return NAN;
+
+            }
+
+        }
+        else {
+            printf("Unexpected token: %c\n", output_queue[i].data.op);
+            return NAN;
+        }
+    }
+
+    if (top > 0) {
+        printf("invalid postfix expression. stack had %d expressions but should have 1", top + 1);
+        return NAN;
+    }
+    return stack[0];
 }
