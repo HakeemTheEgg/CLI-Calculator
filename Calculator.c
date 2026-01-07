@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <math.h>
+#include <math.h> //useful for returning NAN
 
 //macros
 #define MAX_TOKENS 50
@@ -234,9 +234,9 @@ Token *shunting_yard(Token *input_token, int input_count, int *output_count ) {
             output_queue[output_queue_index++] = token;
         }
         else if (token.type == OPERATOR) {
-            while (operator_stack_index >= 0
+            while (operator_stack_index >= 0//conditions to ensure that the stack is not empty and to check precedence of operators
                 && operator_stack[operator_stack_index].type == OPERATOR
-                && ((get_precedence(operator_stack[operator_stack_index]) > get_precedence(token))
+                && ((get_precedence(operator_stack[operator_stack_index]) > get_precedence(token))// uses the return value of helping function get_precedence
                 || (get_precedence(operator_stack[operator_stack_index]) == get_precedence(token) && is_left_associative(token)))
                 && operator_stack[operator_stack_index].data.op != '(') {
 
@@ -274,7 +274,7 @@ Token *shunting_yard(Token *input_token, int input_count, int *output_count ) {
         output_queue[output_queue_index++] = operator_stack[operator_stack_index--];//pop the rest
     }
 
-    free(operator_stack);
+    free(operator_stack);//frees the memory allocated since its no longer needed to avoid leakage
     *output_count = output_queue_index;
     return output_queue;
 
@@ -325,7 +325,7 @@ double evaluate_postfix(Token *output_queue, int count) {
             if (top < 1){
             printf("not enough operands for operator\n");
             return NAN;}
-            double b = stack[top--];
+            double b = stack[top--];//uses the value of the current top of the stack and then moves down one step
             double a = stack[top--];
 
             switch (output_queue[i].data.op) {
@@ -359,8 +359,8 @@ double evaluate_postfix(Token *output_queue, int count) {
     }
 
     if (top > 0) {
-        printf("invalid postfix expression. stack had %d expressions but should have 1\n", top + 1);
+        printf("invalid postfix expression. stack had %d expressions but should have 1\n", top + 1);//in an event of having more than one member on the stack
         return NAN;
     }
-    return stack[0];
+    return stack[0];//returns the first and only member of the stack
 }
