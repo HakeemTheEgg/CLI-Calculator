@@ -1,0 +1,5 @@
+C:\Users\USER\CLionProjects\untitled2\rust_calculator\target\debug\deps\rust_calculator.d: src\main.rs
+
+C:\Users\USER\CLionProjects\untitled2\rust_calculator\target\debug\deps\rust_calculator.exe: src\main.rs
+
+src\main.rs:
