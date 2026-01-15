@@ -18,8 +18,20 @@ fn main(){
         if input == "exit"{
             break;
         }
+        
+        let tokens: Vec<&str> = input.split_whitespace().collect();
+        
+        if tokens.len() !=3{
+            println!("invalid expression. please enter in the format: number operator number");
+            continue;
         }
 
+        let left = tokens[0];
+        let operator = tokens[1];
+        let right = tokens[2];
 
-    println!("you typed: {}", input);
-    }
+        println!("you entered: {} {} {}", left, operator, right);
+
+
+        }
+        }
