@@ -19,13 +19,13 @@ fn main(){
             break;
         }
         
-        let tokens: Vec<&str> = input.split_whitespace().collect();
+        let tokens: Vec<&str> = input.split_whitespace().collect();//creates a vector of string slices that are separated by whitespace
         
         if tokens.len() !=3{
             println!("invalid expression. please enter in the format: number operator number");
             continue;
         }
-
+        //splits the vector into three tokens
         let left = tokens[0];
         let operator = tokens[1];
         let right = tokens[2];
