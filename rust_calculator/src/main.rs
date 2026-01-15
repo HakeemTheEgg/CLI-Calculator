@@ -1,5 +1,12 @@
 use std::io;
 
+enum Operator{
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
 fn main(){
     println!("rust calculator");
     println!("Enter an expression: ");
@@ -27,10 +34,52 @@ fn main(){
         }
         //splits the vector into three tokens
         let left = tokens[0];
-        let operator = tokens[1];
+        let op = tokens[1];
         let right = tokens[2];
 
-        println!("you entered: {} {} {}", left, operator, right);
+        let operator = match op{
+            "+" => Operator::Add,
+            "-" => Operator::Sub,
+            "*" => Operator::Mul,
+            "/" => Operator::Div,
+            _ => {
+                println!("invalid operator. please use one of +, -, *, /");
+                continue;
+            }
+        };
+
+        let left: f64 = match left.parse(){
+            Ok(num) => num,
+            Err(_) => {
+                println!("invalid number: {}", left);
+                continue;
+            }
+        };
+
+        let right: f64 = match right.parse(){
+            Ok(num) => num,
+            Err(_) => {
+                println!("invalid number: {}", right);
+                continue;
+            }
+        };
+
+        let result = match operator{
+            Operator::Add => left + right,
+            Operator::Sub => left - right,
+            Operator::Mul => left * right,
+            Operator::Div => {
+                if right == 0.0{
+                    println!("error: division by zero");
+                    continue;
+                }else{
+                    left / right
+                }
+            }
+        };
+
+
+        println!("results: {} ", result);
 
 
         }
