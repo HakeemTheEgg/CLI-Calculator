@@ -7,6 +7,23 @@ enum Operator{
     Div,
 }
 
+fn calculate(left:f64, op:Operator, right:f64) -> Result<f64, str>{
+    match op {
+        Operator::Add => Ok(left + right),
+        Operator::Sub => Ok(left - right),
+        Operator::Mul => Ok(left * right),
+        Operator::Div => {
+            if right == 0.0{
+                Err("division by zero".to_string())
+            }
+            else {
+                Ok(left/right)
+            }
+
+        }
+    }
+}
+
 fn main(){
     println!("rust calculator");
     println!("Enter an expression: ");
@@ -64,23 +81,11 @@ fn main(){
             }
         };
 
-        let result = match operator{
-            Operator::Add => left + right,
-            Operator::Sub => left - right,
-            Operator::Mul => left * right,
-            Operator::Div => {
-                if right == 0.0{
-                    println!("error: division by zero");
-                    continue;
-                }else{
-                    left / right
-                }
-            }
-        };
-
-
-        println!("results: {} ", result);
-
-
+        match calculate(left, operator, right){
+            Err(e) => println!("Error: {}", e),
+            Ok(result) => println!("results: {} ", result),
         }
         }
+
+
+    }
