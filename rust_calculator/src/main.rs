@@ -7,7 +7,7 @@ enum Operator{
     Div,
 }
 
-fn calculate(left:f64, op:Operator, right:f64) -> Result<f64, str>{
+fn calculate(left:f64, op:Operator, right:f64) -> Result<f64, String>{
     match op {
         Operator::Add => Ok(left + right),
         Operator::Sub => Ok(left - right),
