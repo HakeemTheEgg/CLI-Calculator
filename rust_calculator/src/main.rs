@@ -58,6 +58,7 @@ fn main(){
 
         let mut input = String::new();
         println!("> ");
+        io::stdout().flush().unwrap();// makes the cursor appear on the same line as the prompt
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
@@ -67,8 +68,16 @@ fn main(){
             break;
         }
         
-        let tokens: Vec<&str> = input.split_whitespace().collect();//creates a vector of string slices that are separated by whitespace
-        
+        match parse_input(input){
+            Ok((left ,op, right)) =>{
+                match calculate(left, op, right){
+                    Ok(result) => println! ("Result: {}", result),
+                    Err(e) => println! ("error: {}", e)
+
+                }
+            }
+            Err(e) => println! ("error: {}", e),
+        }       
         
         }
 
