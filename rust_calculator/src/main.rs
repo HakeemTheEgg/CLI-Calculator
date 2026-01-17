@@ -23,7 +23,31 @@ fn calculate(left:f64, op:Operator, right:f64) -> Result<f64, String>{
         }
     }
 }
-fn parse_input
+fn parse_input(input: &str) -> Result<(f64, Operator, f64), String>{
+    let tokens: Vec<&str> = input.split_whitespace().collect();
+    if tokens.len() != 3{
+        return Err("please enter in the format: number operator number".to_string());
+    }
+
+    let left: f64 = tokens[0]
+        .parse()
+        .map_err(|_| format!("invalid number: {}", tokens[0]))?;
+
+    let op = match tokens[1]{
+        "+" => Operator::Add,
+        "-" => Operator::Sub,
+        "*" => Operator::Mul,
+        "/" => Operator::Div,
+        _ => return Err(format!("invalid operator: {}", tokens[1])),
+    };
+    
+    let right: f64 = tokens[2]
+        .parse()
+        .map_err(|_| format!("invalid number: {}", tokens[2]))?;
+
+    Ok((left, op, right))
+}
+
 fn main(){
     println!("rust calculator");
     println!("Enter an expression: ");
@@ -45,46 +69,7 @@ fn main(){
         
         let tokens: Vec<&str> = input.split_whitespace().collect();//creates a vector of string slices that are separated by whitespace
         
-        if tokens.len() !=3{
-            println!("invalid expression. please enter in the format: number operator number");
-            continue;
-        }
-        //splits the vector into three tokens
-        let left = tokens[0];
-        let op = tokens[1];
-        let right = tokens[2];
-
-        let operator = match op{
-            "+" => Operator::Add,
-            "-" => Operator::Sub,
-            "*" => Operator::Mul,
-            "/" => Operator::Div,
-            _ => {
-                println!("invalid operator. please use one of +, -, *, /");
-                continue;
-            }
-        };
-
-        let left: f64 = match left.parse(){
-            Ok(num) => num,
-            Err(_) => {
-                println!("invalid number: {}", left);
-                continue;
-            }
-        };
-
-        let right: f64 = match right.parse(){
-            Ok(num) => num,
-            Err(_) => {
-                println!("invalid number: {}", right);
-                continue;
-            }
-        };
-
-        match calculate(left, operator, right){
-            Err(e) => println!("Error: {}", e),
-            Ok(result) => println!("results: {} ", result),
-        }
+        
         }
 
 
