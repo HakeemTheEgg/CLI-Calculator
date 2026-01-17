@@ -23,7 +23,7 @@ fn calculate(left:f64, op:Operator, right:f64) -> Result<f64, String>{
         }
     }
 }
-
+fn parse_input
 fn main(){
     println!("rust calculator");
     println!("Enter an expression: ");
