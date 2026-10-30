@@ -82,7 +82,7 @@ int main(void) {
 //function definitions
 Token *tokenize(const char *expression, int *token_count) {
     Token *tokens = malloc(sizeof(Token) * MAX_TOKENS);
-    printf("allocated %llu bytes at address %p\n", sizeof(Token) * MAX_TOKENS, (void*)tokens);
+
 
     if (!tokens) {
         printf("memory allocation failure!\n");
