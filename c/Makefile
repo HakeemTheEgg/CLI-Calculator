@@ -1,6 +1,7 @@
-CC     = gcc
-CFLAGS = -std=c11 -Wall -Wextra -O2
-SRC    := src/main.c
+CC      = gcc
+CFLAGS  = -std=c11 -Wall -Wextra -O2
+SRC     := src/main.c src/tokenizer.c src/parser.c src/evaluator.c
+INCLUDE := -Iinclude
 
 ifeq ($(OS),Windows_NT)
     BIN   := calculator.exe
@@ -17,10 +18,10 @@ endif
 all: $(BIN)
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) -o $@ $<
+	$(CC) $(CFLAGS) $(INCLUDE) -o $@ $(SRC)
 
 run: $(BIN)
-	./$(BIN)
+	-./$(BIN)
 
 clean:
 	-$(RM) $(BIN) $(RMERR)

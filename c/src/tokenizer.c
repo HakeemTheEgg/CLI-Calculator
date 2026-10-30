@@ -3,80 +3,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_TOKENS 50
-#define MAX_EXPRESSION_LENGTH 100
+#include "calculator.h"
 
-//structs and enums for structure
-
-typedef enum {
-    NUMBER,
-    OPERATOR,
-    END_OF_INPUT,
-}TokenType;
-
-typedef struct {
-    TokenType type;
-    union {
-        double value;
-        char op;
-    }data;
-}Token;
-
-//function declarations
-Token *tokenize(const char *expression, int *token_count);
-void printTokens(Token *tokens, int token_count);
-
-int main(void) {
-    char expression[MAX_EXPRESSION_LENGTH];
-
-    printf("Enter an expression: \n");
-    fgets(expression, MAX_EXPRESSION_LENGTH, stdin);
-
-    //get rid of newline
-    expression[strcspn(expression, "\n")] = '\0';
-
-    int token_count = 0;
-    Token *tokens = tokenize(expression, &token_count);
-
-    if (tokens != NULL) {
-        printTokens(tokens, token_count);
-        free(tokens);
-    }
-
-
-
-
-    return 0;
-}
-
-//function definitions
 Token *tokenize(const char *expression, int *token_count) {
     Token *tokens = malloc(sizeof(Token) * MAX_TOKENS);
-    printf("Allocated %llu bytes at address %p\n",
-       sizeof(Token) * MAX_TOKENS,
-       (void*)tokens);
+
     if (!tokens) {
-        printf("memory allocation failed!\n");
+        printf("memory allocation failure!\n");
         return NULL;
     }
     int i = 0;
     int t = 0;
 
-
     while (expression[i] != '\0' && t < MAX_TOKENS) {
-         if (isspace(expression[i])) {
-             i++; //skip whitespaces
-             continue;
-         }
+        if (isspace(expression[i])) {
+            i++;
+            continue;
+        }
         if (isdigit(expression[i]) || expression[i] == '.') {
             int j = 0;
             char num_string[50];
-
-            while ((isdigit(expression[i]) || expression[i] == '.') && j<49) {
-                num_string[j++] = expression[i++];  //store numbers and decimals in temporary buffer
+            while ((isdigit(expression[i]) || expression[i] == '.') && j < 49 && expression[i] != '\0') {
+                num_string[j++] = expression[i++];
             }
             num_string[j] = '\0';
-
             tokens[t].type = NUMBER;
             tokens[t].data.value = atof(num_string);
             t++;
@@ -87,25 +37,38 @@ Token *tokenize(const char *expression, int *token_count) {
             tokens[t].data.op = expression[i];
             t++;
             i++;
-            continue; //sorts the arithmetic symbols and places them as  "operator" types of the struct
+            continue;
         }
-
-        printf("Unexpected character: %c\n", expression[i]);
+        if (expression[i] == '(') {
+            tokens[t].type = PAREN_LEFT;
+            tokens[t].data.op = '(';
+            t++;
+            i++;
+            continue;
+        }
+        if (expression[i] == ')') {
+            tokens[t].type = PAREN_RIGHT;
+            tokens[t].data.op = ')';
+            t++;
+            i++;
+            continue;
+        }
+        printf("Invalid character: %c\n", expression[i]);
         free(tokens);
         return NULL;
     }
-
     tokens[t].type = END_OF_INPUT;
     *token_count = t;
     return tokens;
 }
+
 void printTokens(Token *tokens, int token_count) {
-    printf("Tokens found(%d):\n", token_count);
+    printf("Tokens found(%d): \n", token_count);
     for (int i = 0; i < token_count; i++) {
         if (tokens[i].type == NUMBER) {
-            printf(" Number: %.2f\n",tokens[i].data.value);
-        }else if (tokens[i].type == OPERATOR) {
-            printf(" Operator: %c\n",tokens[i].data.op);
+            printf("  [NUMBER: %.2f]\n", tokens[i].data.value);
+        } else if (tokens[i].type == OPERATOR) {
+            printf("  [OPERATOR: %c]\n", tokens[i].data.op);
         }
     }
 }
